@@ -1,0 +1,515 @@
+import { useState } from "react";
+
+const S = "#FF6200";
+const G = "#046A38";
+const N = "#003366";
+const GOLD = "#C8972B";
+const AB = "#0035AD";
+const CREAM = "#FDF6E3";
+const DARK = "#0A0A1A";
+
+const OWNER = {
+  name: "Rajesh Mahadev Ghooli",
+  company: "RAM Git Consultancy",
+  email: "ramg09@proton.me",
+  payment: "ramg@unitypay",
+  phone: "+91 94210 94594",
+  title: "Governor & Proprietor",
+  jurisdiction: "Republic of India – Bharat",
+  regNo: "RAMGC-BHARAT-2026-001",
+};
+
+function Chakra({ size = 36, color = AB }) {
+  const cx = size / 2, cy = size / 2, r = size / 2 - 2;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="1.5" />
+      <circle cx={cx} cy={cy} r={2.5} fill={color} />
+      {Array.from({ length: 24 }, (_, i) => {
+        const a = (i * 360) / 24, rad = (a * Math.PI) / 180;
+        return <line key={i} x1={cx} y1={cy} x2={cx + r * 0.85 * Math.cos(rad)} y2={cy + r * 0.85 * Math.sin(rad)} stroke={color} strokeWidth="0.7" />;
+      })}
+    </svg>
+  );
+}
+
+function Flag() {
+  return (
+    <div style={{ display: "flex", height: 5, borderRadius: 3, overflow: "hidden" }}>
+      <div style={{ flex: 1, background: S }} />
+      <div style={{ flex: 1, background: "#fff", border: "0.5px solid #ddd" }} />
+      <div style={{ flex: 1, background: G }} />
+    </div>
+  );
+}
+
+function Badge({ label, color = N }) {
+  return (
+    <span style={{
+      display: "inline-block", padding: "2px 10px", borderRadius: 20,
+      background: color + "18", border: `1px solid ${color}44`,
+      fontSize: 10, color, fontWeight: 700, letterSpacing: 1, marginRight: 6, marginBottom: 4
+    }}>{label}</span>
+  );
+}
+
+function Section({ title, icon, children }) {
+  return (
+    <div style={{ background: "#fff", borderRadius: 14, padding: 24, marginBottom: 18, boxShadow: "0 2px 12px #0001", border: `1px solid ${GOLD}33` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <span style={{ fontSize: 22 }}>{icon}</span>
+        <div style={{ fontSize: 14, fontWeight: 700, color: N, letterSpacing: 1 }}>{title.toUpperCase()}</div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Row({ label, value, mono }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "8px 0", borderBottom: `1px solid ${GOLD}22` }}>
+      <div style={{ fontSize: 11, color: "#888", letterSpacing: 1, minWidth: 140 }}>{label.toUpperCase()}</div>
+      <div style={{ fontSize: 13, color: N, fontWeight: 600, fontFamily: mono ? "monospace" : "sans-serif", textAlign: "right" }}>{value}</div>
+    </div>
+  );
+}
+
+const LAWS = [
+  {
+    id: "IPL-001",
+    title: "Digital Intellectual Property Protection Act",
+    category: "IP Law",
+    status: "Active",
+    desc: "All original digital works, source code, algorithms, content, and innovations created under RAM Git Consultancy are protected under this act. Unauthorized reproduction, distribution, or commercial use without written consent is prohibited.",
+    penalties: "₹10,00,000 fine or 3 years imprisonment",
+    effective: "01 Jan 2026",
+  },
+  {
+    id: "IPL-002",
+    title: "Open Source Governance & Royalty Act",
+    category: "Royalty Law",
+    status: "Active",
+    desc: "All royalties, licensing fees, and revenue generated from open source projects registered under RAMGC shall be automatically transferred to the designated Unity Pay account (ramg@unitypay) within 7 business days of accrual.",
+    penalties: "Withholding royalties is a criminal offence",
+    effective: "01 Jan 2026",
+  },
+  {
+    id: "IPL-003",
+    title: "Online User Content Safety & Contracts Act",
+    category: "Public Safety",
+    status: "Active",
+    desc: "All user-generated content (UGC) on platforms governed under this framework is protected. Contracts assigned by the Governor are legally binding. No platform may alter, delete, or monetise user content without explicit written consent.",
+    penalties: "Platform suspension & ₹50,00,000 fine",
+    effective: "01 Jan 2026",
+  },
+  {
+    id: "IPL-004",
+    title: "Public Power Rule Governance Framework",
+    category: "Governance",
+    status: "Active",
+    desc: "Citizens retain the right to propose, debate, and ratify rules governing digital public spaces. All rule changes require public majority approval. The Governor holds veto and ratification authority over all enacted rules.",
+    penalties: "Unilateral rule changes are void ab initio",
+    effective: "01 Jan 2026",
+  },
+  {
+    id: "IPL-005",
+    title: "Made in India Digital Innovation Protection",
+    category: "IP Law",
+    status: "Active",
+    desc: "Software, platforms, and digital tools created under the Make in India initiative by RAMGC are entitled to priority patent protection, trademark registration, and preferential treatment in government procurement.",
+    penalties: "IP theft: ₹25,00,000 fine",
+    effective: "01 Jan 2026",
+  },
+];
+
+const CERTS = [
+  { id: "CERT-RAMGC-2026-001", type: "Governor's Charter", subject: "RAM Git Consultancy", scope: "Full IP & Governance Authority" },
+  { id: "CERT-RAMGC-2026-002", type: "Royalty Assignment", subject: "Unity Pay – ramg@unitypay", scope: "All Royalty Transfers & Credits" },
+  { id: "CERT-RAMGC-2026-003", type: "UGC Safety Certificate", subject: "Online User Content", scope: "Full Content Protection" },
+  { id: "CERT-RAMGC-2026-004", type: "Make in India IP", subject: "Open Source Projects", scope: "Patent & Trademark Shield" },
+];
+
+const TABS = ["overview", "laws", "certificates", "royalty", "ugc", "governance"];
+const TAB_LABELS = { overview: "🏛️ Overview", laws: "📜 Laws", certificates: "🎖️ Certificates", royalty: "💰 Royalty", ugc: "🛡️ UGC Safety", governance: "⚖️ Governance" };
+
+export default function App() {
+  const [tab, setTab] = useState("overview");
+  const [expandedLaw, setExpandedLaw] = useState(null);
+  const [proposalText, setProposalText] = useState("");
+  const [proposals, setProposals] = useState([
+    { id: 1, text: "Mandate open source licensing for all govt-funded software", votes: 142, status: "Open" },
+    { id: 2, text: "Require UGC platforms to pay 1% royalty to content creators", votes: 89, status: "Open" },
+  ]);
+  const [toast, setToast] = useState("");
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
+
+  const submitProposal = () => {
+    if (!proposalText.trim()) return;
+    setProposals(p => [...p, { id: Date.now(), text: proposalText, votes: 1, status: "Open" }]);
+    setProposalText("");
+    showToast("✅ Proposal submitted for public vote!");
+  };
+
+  const vote = (id) => {
+    setProposals(p => p.map(x => x.id === id ? { ...x, votes: x.votes + 1 } : x));
+    showToast("🗳️ Vote recorded!");
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F0F4FF", fontFamily: "system-ui, sans-serif" }}>
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: "fixed", top: 20, right: 20, background: G, color: "#fff",
+          padding: "12px 20px", borderRadius: 10, zIndex: 999, fontWeight: 600, fontSize: 13,
+          boxShadow: "0 4px 20px #0004"
+        }}>{toast}</div>
+      )}
+
+      {/* Header */}
+      <div style={{ background: `linear-gradient(135deg, ${DARK} 0%, ${N} 100%)`, color: "#fff", padding: "0 0 0 0" }}>
+        <Flag />
+        <div style={{ padding: "20px 24px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
+            <Chakra size={52} color="#fff" />
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: 1 }}>RAM GOVERNANCE PLATFORM</div>
+              <div style={{ fontSize: 11, color: "#aac4ff", letterSpacing: 2 }}>
+                IP LAW · OPEN SOURCE · PUBLIC POWER · MAKE IN INDIA
+              </div>
+            </div>
+            <div style={{ marginLeft: "auto", textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: GOLD, letterSpacing: 1 }}>GOVERNOR</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{OWNER.name}</div>
+              <div style={{ fontSize: 10, color: "#aac4ff" }}>{OWNER.company}</div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 8 }}>
+            {TABS.map(t => (
+              <button key={t} onClick={() => setTab(t)} style={{
+                padding: "7px 14px", borderRadius: 8, border: "none",
+                background: tab === t ? GOLD : "#ffffff18",
+                color: tab === t ? "#000" : "#fff",
+                cursor: "pointer", fontSize: 12, fontWeight: 600
+              }}>{TAB_LABELS[t]}</button>
+            ))}
+          </div>
+        </div>
+        <Flag />
+      </div>
+
+      <div style={{ padding: "20px 16px", maxWidth: 800, margin: "0 auto" }}>
+
+        {/* OVERVIEW */}
+        {tab === "overview" && (
+          <>
+            {/* Owner Card */}
+            <div style={{
+              background: `linear-gradient(135deg, ${N}, ${AB})`,
+              borderRadius: 16, padding: 24, marginBottom: 18, color: "#fff",
+              border: `2px solid ${GOLD}`,
+              boxShadow: `0 0 0 4px #fff, 0 0 0 6px ${GOLD}44`
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: "50%",
+                  background: GOLD, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 24, fontWeight: 800, color: N
+                }}>R</div>
+                <div>
+                  <div style={{ fontSize: 11, color: GOLD, letterSpacing: 2 }}>PROPRIETOR & GOVERNOR</div>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>{OWNER.name}</div>
+                  <div style={{ fontSize: 12, color: "#aac4ff" }}>{OWNER.company} · {OWNER.regNo}</div>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {[
+                  ["📧 Email", OWNER.email],
+                  ["💳 Unity Pay", OWNER.payment],
+                  ["📞 Phone", OWNER.phone],
+                  ["🌏 Jurisdiction", OWNER.jurisdiction],
+                ].map(([l, v]) => (
+                  <div key={l} style={{ background: "#ffffff18", borderRadius: 8, padding: "8px 12px" }}>
+                    <div style={{ fontSize: 10, color: "#aac4ff" }}>{l}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, fontFamily: "monospace" }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 18 }}>
+              {[
+                { n: "5", l: "Active Laws", c: S },
+                { n: "4", l: "Certificates", c: GOLD },
+                { n: "∞", l: "UGC Protected", c: G },
+              ].map(x => (
+                <div key={x.l} style={{ background: "#fff", borderRadius: 12, padding: "16px 12px", textAlign: "center", border: `2px solid ${x.c}33` }}>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: x.c }}>{x.n}</div>
+                  <div style={{ fontSize: 11, color: "#888", letterSpacing: 1 }}>{x.l.toUpperCase()}</div>
+                </div>
+              ))}
+            </div>
+
+            <Section title="Platform Mission" icon="🏛️">
+              <p style={{ fontSize: 13, color: "#555", lineHeight: 1.8, margin: 0 }}>
+                The <strong>RAM Governance Platform</strong> is an open source legal and governance framework created under the <strong>Make in India</strong> initiative. It enables citizens to propose and vote on rules, protects intellectual property, ensures royalty payments flow to the rightful owner, and safeguards online user-generated content — all governed by the <strong>Governor, {OWNER.name}</strong>.
+              </p>
+              <div style={{ marginTop: 14 }}>
+                <Badge label="OPEN SOURCE" color={G} />
+                <Badge label="MAKE IN INDIA" color={S} />
+                <Badge label="BHARAT DIGITAL" color={AB} />
+                <Badge label="PUBLIC POWER" color={GOLD} />
+                <Badge label="MIT LICENSE" color={N} />
+              </div>
+            </Section>
+
+            <Section title="Royalty Flow" icon="💰">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 13 }}>
+                {["Certificate Issued", "→", "Royalty Generated", "→", "Unity Pay", "→", "ramg@unitypay", "→", "+91 94210 94594"].map((x, i) => (
+                  <span key={i} style={{
+                    background: x === "→" ? "transparent" : `${GOLD}22`,
+                    border: x === "→" ? "none" : `1px solid ${GOLD}`,
+                    borderRadius: 6, padding: x === "→" ? "0" : "4px 10px",
+                    color: x === "→" ? GOLD : N, fontWeight: x === "→" ? 400 : 600,
+                    fontSize: x === "→" ? 18 : 12
+                  }}>{x}</span>
+                ))}
+              </div>
+            </Section>
+          </>
+        )}
+
+        {/* LAWS */}
+        {tab === "laws" && (
+          <>
+            <div style={{ fontSize: 12, color: "#888", marginBottom: 16, letterSpacing: 1 }}>
+              ALL LAWS ENACTED BY GOVERNOR {OWNER.name.toUpperCase()} · {OWNER.company.toUpperCase()}
+            </div>
+            {LAWS.map(law => (
+              <div key={law.id} style={{
+                background: "#fff", borderRadius: 14, marginBottom: 14,
+                border: `1px solid ${GOLD}44`, overflow: "hidden",
+                boxShadow: "0 2px 10px #0001"
+              }}>
+                <div
+                  onClick={() => setExpandedLaw(expandedLaw === law.id ? null : law.id)}
+                  style={{ padding: "16px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}
+                >
+                  <div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                      <Badge label={law.id} color={AB} />
+                      <Badge label={law.category} color={S} />
+                      <Badge label={law.status} color={G} />
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: N }}>{law.title}</div>
+                    <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>Effective: {law.effective}</div>
+                  </div>
+                  <div style={{ fontSize: 18, color: GOLD }}>{expandedLaw === law.id ? "▲" : "▼"}</div>
+                </div>
+                {expandedLaw === law.id && (
+                  <div style={{ padding: "0 20px 20px", borderTop: `1px solid ${GOLD}22` }}>
+                    <p style={{ fontSize: 13, color: "#444", lineHeight: 1.8, marginTop: 14 }}>{law.desc}</p>
+                    <div style={{ background: "#fff0f0", border: "1px solid #ffaaaa", borderRadius: 8, padding: "10px 14px", marginTop: 10 }}>
+                      <div style={{ fontSize: 11, color: "#c00", fontWeight: 700, letterSpacing: 1 }}>⚠️ PENALTIES</div>
+                      <div style={{ fontSize: 13, color: "#800", marginTop: 4 }}>{law.penalties}</div>
+                    </div>
+                    <div style={{ background: `${GOLD}11`, border: `1px solid ${GOLD}44`, borderRadius: 8, padding: "10px 14px", marginTop: 8 }}>
+                      <div style={{ fontSize: 11, color: GOLD, fontWeight: 700, letterSpacing: 1 }}>👑 ENACTED BY</div>
+                      <div style={{ fontSize: 13, color: N, marginTop: 4 }}>{OWNER.name} · {OWNER.title} · {OWNER.company}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* CERTIFICATES */}
+        {tab === "certificates" && (
+          <>
+            {CERTS.map(cert => (
+              <div key={cert.id} style={{
+                background: CREAM, borderRadius: 14, padding: 20, marginBottom: 14,
+                border: `2px solid ${GOLD}`, boxShadow: `0 0 0 4px #fff, 0 0 0 6px ${GOLD}33`
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                  <div>
+                    <Badge label={cert.type} color={N} />
+                    <div style={{ fontSize: 15, fontWeight: 700, color: N, marginTop: 6 }}>{cert.subject}</div>
+                    <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{cert.scope}</div>
+                  </div>
+                  <Chakra size={40} color={GOLD} />
+                </div>
+                <div style={{ borderTop: `1px solid ${GOLD}44`, paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ fontSize: 11, color: "#888", fontFamily: "monospace" }}>{cert.id}</div>
+                  <div style={{ fontSize: 10, color: G, fontWeight: 700 }}>✓ ISSUED BY GOVERNOR</div>
+                </div>
+                <Flag />
+              </div>
+            ))}
+            <div style={{ background: "#fff", borderRadius: 12, padding: 18, border: `1px dashed ${GOLD}` }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>All royalties from certificates are credited to:</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: N, fontFamily: "monospace" }}>
+                💳 {OWNER.payment} · 📞 {OWNER.phone}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ROYALTY */}
+        {tab === "royalty" && (
+          <>
+            <Section title="Royalty Assignment Declaration" icon="💰">
+              <div style={{ background: `${N}08`, border: `1px solid ${N}22`, borderRadius: 10, padding: 16, marginBottom: 14 }}>
+                <p style={{ fontSize: 13, color: "#333", lineHeight: 1.9, margin: 0 }}>
+                  All royalties, licensing fees, usage charges, and revenues generated from intellectual property, certificates, open source licenses, and digital works registered under <strong>RAM Git Consultancy</strong> shall be unconditionally transferred and credited to the following account:
+                </p>
+              </div>
+              <Row label="Beneficiary" value={OWNER.name} />
+              <Row label="Company" value={OWNER.company} />
+              <Row label="Unity Pay Account" value={OWNER.payment} mono />
+              <Row label="Mobile / UPI" value={OWNER.phone} mono />
+              <Row label="Contact Email" value={OWNER.email} mono />
+              <Row label="Transfer Timeline" value="Within 7 business days of accrual" />
+              <Row label="Jurisdiction" value={OWNER.jurisdiction} />
+              <Row label="Authority" value="Governor – Full Royalty Rights" />
+            </Section>
+
+            <Section title="Royalty Categories" icon="📊">
+              {[
+                ["Open Source License Fees", "100% to RAMGC Governor"],
+                ["Certificate Issuance Fees", "100% to RAMGC Governor"],
+                ["Patent Licensing Revenue", "100% to RAMGC Governor"],
+                ["Trademark Usage Fees", "100% to RAMGC Governor"],
+                ["UGC Platform Royalties", "100% to RAMGC Governor"],
+                ["Make in India Grants", "100% to RAMGC Governor"],
+              ].map(([k, v]) => (
+                <Row key={k} label={k} value={v} />
+              ))}
+            </Section>
+
+            <div style={{ background: `linear-gradient(135deg, ${S}11, ${G}11)`, border: `1px solid ${GOLD}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 6 }}>⚠️ LEGAL NOTICE</div>
+              <div style={{ fontSize: 13, color: N, lineHeight: 1.8 }}>
+                Withholding, diverting, or delaying royalty payments is a criminal offence under <strong>IPL-002 Open Source Governance & Royalty Act</strong>. Violators are subject to prosecution under Indian IP law.
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* UGC SAFETY */}
+        {tab === "ugc" && (
+          <>
+            <Section title="User Generated Content Protection" icon="🛡️">
+              <p style={{ fontSize: 13, color: "#444", lineHeight: 1.9, marginTop: 0 }}>
+                Under the <strong>Online User Content Safety & Contracts Act (IPL-003)</strong>, all user-generated content on platforms governed by this framework receives full legal protection. The Governor holds authority to assign, ratify, and enforce content contracts.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
+                {[
+                  { icon: "🔒", title: "Content Ownership", desc: "Users retain full ownership of their original content at all times." },
+                  { icon: "📋", title: "Contract Enforcement", desc: "Contracts assigned by the Governor are legally binding and enforceable." },
+                  { icon: "🚫", title: "No Unauthorized Use", desc: "Platforms cannot alter, monetise, or delete UGC without written consent." },
+                  { icon: "⚖️", title: "Legal Recourse", desc: "Violations are subject to ₹50,00,000 fine and platform suspension." },
+                  { icon: "🌐", title: "Online Safety", desc: "All digital spaces are subject to public safety governance rules." },
+                  { icon: "👑", title: "Governor Authority", desc: "Governor Rajesh Mahadev Ghooli holds full protective oversight." },
+                ].map(x => (
+                  <div key={x.title} style={{ background: `${AB}08`, border: `1px solid ${AB}22`, borderRadius: 10, padding: 14 }}>
+                    <div style={{ fontSize: 20, marginBottom: 6 }}>{x.icon}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: N, marginBottom: 4 }}>{x.title}</div>
+                    <div style={{ fontSize: 11, color: "#666", lineHeight: 1.6 }}>{x.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Content Contract Assignment" icon="📋">
+              <Row label="Governor" value={OWNER.name} />
+              <Row label="Authority" value="Full Contract Assignment Rights" />
+              <Row label="Scope" value="All UGC on governed platforms" />
+              <Row label="Enforcement" value="Indian IP & Contract Law" />
+              <Row label="Appeals" value={OWNER.email} mono />
+            </Section>
+          </>
+        )}
+
+        {/* GOVERNANCE */}
+        {tab === "governance" && (
+          <>
+            <Section title="Public Rule Proposals" icon="⚖️">
+              <p style={{ fontSize: 12, color: "#666", marginTop: 0, marginBottom: 16 }}>
+                Citizens can propose rules. All proposals go to public vote. The Governor holds final ratification authority.
+              </p>
+              {proposals.map(p => (
+                <div key={p.id} style={{ background: `${N}06`, border: `1px solid ${N}18`, borderRadius: 10, padding: 14, marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: N, marginBottom: 10, lineHeight: 1.6 }}>{p.text}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Badge label={p.status} color={G} />
+                      <span style={{ fontSize: 12, color: "#888" }}>🗳️ {p.votes} votes</span>
+                    </div>
+                    <button onClick={() => vote(p.id)} style={{
+                      padding: "6px 16px", background: AB, color: "#fff",
+                      border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600
+                    }}>Vote ▲</button>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ marginTop: 18, borderTop: `1px solid ${GOLD}44`, paddingTop: 18 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: N, marginBottom: 8, letterSpacing: 1 }}>
+                  PROPOSE A NEW RULE
+                </div>
+                <textarea
+                  value={proposalText}
+                  onChange={e => setProposalText(e.target.value)}
+                  placeholder="Describe your proposed rule for public governance..."
+                  rows={3}
+                  style={{
+                    width: "100%", padding: "10px 14px", borderRadius: 8,
+                    border: `1.5px solid ${GOLD}88`, fontSize: 13,
+                    resize: "vertical", fontFamily: "sans-serif", color: N,
+                    boxSizing: "border-box"
+                  }}
+                />
+                <button onClick={submitProposal} disabled={!proposalText.trim()} style={{
+                  marginTop: 10, width: "100%", padding: "12px",
+                  background: proposalText.trim() ? `linear-gradient(135deg, ${S}, ${G})` : "#ccc",
+                  color: "#fff", border: "none", borderRadius: 10,
+                  fontSize: 13, fontWeight: 700, cursor: proposalText.trim() ? "pointer" : "not-allowed",
+                  letterSpacing: 1
+                }}>
+                  🇮🇳 Submit Proposal for Public Vote
+                </button>
+              </div>
+            </Section>
+
+            <Section title="Governor's Authority" icon="👑">
+              <Row label="Governor" value={OWNER.name} />
+              <Row label="Title" value={OWNER.title} />
+              <Row label="Company" value={OWNER.company} />
+              <Row label="Reg. No." value={OWNER.regNo} mono />
+              <Row label="Powers" value="Veto · Ratification · Contract Assignment · Royalty Authority" />
+              <Row label="Contact" value={OWNER.email} mono />
+              <Row label="Platform" value="Open Source · MIT License · india.gov.in" />
+            </Section>
+          </>
+        )}
+
+        {/* Footer */}
+        <div style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: "#aaa", lineHeight: 1.8 }}>
+          <Flag />
+          <div style={{ marginTop: 10 }}>
+            🔓 Open Source · MIT License · RAM Git Consultancy · {OWNER.email}<br />
+            Make in India Initiative · Bharat · india.gov.in<br />
+            All royalties → {OWNER.payment} · {OWNER.phone}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
