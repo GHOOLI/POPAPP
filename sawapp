@@ -1,0 +1,382 @@
+import { useState, useRef } from "react";
+
+const SAFFRON = "#FF6200";
+const INDIA_GREEN = "#046A38";
+const NAVY = "#003366";
+const GOLD = "#C8972B";
+const ASHOKA_BLUE = "#0035AD";
+const CREAM = "#FDF6E3";
+const LIGHT_SAFFRON = "#FFF3E8";
+
+function AshokaChakra({ size = 40, color = ASHOKA_BLUE }) {
+  const cx = size / 2, cy = size / 2, r = size / 2 - 2;
+  const spokes = Array.from({ length: 24 }, (_, i) => {
+    const angle = (i * 360) / 24;
+    const rad = (angle * Math.PI) / 180;
+    const x2 = cx + r * 0.85 * Math.cos(rad);
+    const y2 = cy + r * 0.85 * Math.sin(rad);
+    return { x1: cx, y1: cy, x2, y2 };
+  });
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="1.5" />
+      <circle cx={cx} cy={cy} r={3} fill={color} />
+      {spokes.map((s, i) => (
+        <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={color} strokeWidth="0.8" />
+      ))}
+    </svg>
+  );
+}
+
+function TricolorStripe() {
+  return (
+    <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", marginBottom: 12 }}>
+      <div style={{ flex: 1, background: SAFFRON }} />
+      <div style={{ flex: 1, background: "#fff", border: "0.5px solid #eee" }} />
+      <div style={{ flex: 1, background: INDIA_GREEN }} />
+    </div>
+  );
+}
+
+function CertificatePreview({ data }) {
+  const today = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+  return (
+    <div style={{
+      background: CREAM,
+      border: `3px solid ${GOLD}`,
+      borderRadius: 16,
+      padding: "32px 36px",
+      position: "relative",
+      fontFamily: "'Georgia', serif",
+      boxShadow: `0 0 0 6px #fff, 0 0 0 9px ${GOLD}33`,
+      maxWidth: 680,
+      margin: "0 auto"
+    }}>
+      {/* Corner decorations */}
+      {["top-left","top-right","bottom-left","bottom-right"].map(pos => (
+        <div key={pos} style={{
+          position: "absolute",
+          [pos.includes("top") ? "top" : "bottom"]: 10,
+          [pos.includes("left") ? "left" : "right"]: 10,
+          width: 28, height: 28,
+          borderTop: pos.includes("top") ? `3px solid ${GOLD}` : "none",
+          borderBottom: pos.includes("bottom") ? `3px solid ${GOLD}` : "none",
+          borderLeft: pos.includes("left") ? `3px solid ${GOLD}` : "none",
+          borderRight: pos.includes("right") ? `3px solid ${GOLD}` : "none",
+        }} />
+      ))}
+
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        {/* Tricolor bar */}
+        <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
+          <div style={{ flex: 1, background: SAFFRON }} />
+          <div style={{ flex: 1, background: "#fff", border: "0.5px solid #ddd" }} />
+          <div style={{ flex: 1, background: INDIA_GREEN }} />
+        </div>
+
+        {/* Emblem row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 8 }}>
+          <AshokaChakra size={48} color={ASHOKA_BLUE} />
+          <div>
+            <div style={{ fontSize: 11, color: NAVY, letterSpacing: 4, fontFamily: "sans-serif", fontWeight: 700 }}>
+              भारत सरकार
+            </div>
+            <div style={{ fontSize: 10, color: NAVY, letterSpacing: 3, fontFamily: "sans-serif" }}>
+              GOVERNMENT OF INDIA
+            </div>
+          </div>
+          <AshokaChakra size={48} color={ASHOKA_BLUE} />
+        </div>
+
+        <div style={{ fontSize: 11, color: SAFFRON, letterSpacing: 6, fontFamily: "sans-serif", fontWeight: 700, marginBottom: 4 }}>
+          MAKE IN INDIA INITIATIVE
+        </div>
+        <div style={{ fontSize: 26, color: NAVY, fontWeight: "bold", letterSpacing: 2 }}>
+          🇮🇳 हिन्दुस्तान प्रमाणपत्र
+        </div>
+        <div style={{ fontSize: 13, color: NAVY, letterSpacing: 4, fontFamily: "sans-serif" }}>
+          HINDUSTAN CERTIFICATE OF ORIGIN
+        </div>
+      </div>
+
+      <div style={{ borderTop: `1px solid ${GOLD}88`, marginBottom: 20 }} />
+
+      {/* Body */}
+      <div style={{ textAlign: "center", marginBottom: 18 }}>
+        <div style={{ fontSize: 12, color: "#555", fontFamily: "sans-serif", marginBottom: 6 }}>
+          This is to certify that
+        </div>
+        <div style={{ fontSize: 28, color: INDIA_GREEN, fontWeight: "bold", letterSpacing: 1, marginBottom: 4 }}>
+          {data.name || "Recipient Name"}
+        </div>
+        {data.orgName && (
+          <div style={{ fontSize: 14, color: NAVY, fontFamily: "sans-serif", marginBottom: 4 }}>
+            {data.orgName}
+          </div>
+        )}
+        <div style={{ fontSize: 12, color: "#555", fontFamily: "sans-serif", marginBottom: 12 }}>
+          has successfully fulfilled the criteria under the
+        </div>
+
+        <div style={{
+          background: `linear-gradient(135deg, ${SAFFRON}22, ${INDIA_GREEN}22)`,
+          border: `1px solid ${GOLD}`,
+          borderRadius: 8,
+          padding: "10px 20px",
+          display: "inline-block",
+          marginBottom: 14
+        }}>
+          <div style={{ fontSize: 15, color: NAVY, fontWeight: "bold", fontFamily: "sans-serif" }}>
+            {data.category || "Made in India – Digital & Technology"}
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, color: "#666", fontFamily: "sans-serif", lineHeight: 1.7 }}>
+          {data.description || "In recognition of contribution to India's indigenous innovation and self-reliance under the Atmanirbhar Bharat vision."}
+        </div>
+      </div>
+
+      {/* Certificate number & date */}
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "flex-end",
+        borderTop: `1px solid ${GOLD}88`, paddingTop: 16, marginTop: 8
+      }}>
+        <div>
+          <div style={{ fontSize: 9, color: "#888", fontFamily: "sans-serif", letterSpacing: 1 }}>CERTIFICATE NO.</div>
+          <div style={{ fontSize: 12, color: NAVY, fontFamily: "monospace", fontWeight: "bold" }}>
+            {data.certNo || "BHARAT-2026-000001"}
+          </div>
+          <div style={{ fontSize: 9, color: "#888", fontFamily: "sans-serif", marginTop: 2 }}>
+            Issued: {today}
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center" }}>
+          <AshokaChakra size={36} color={`${GOLD}`} />
+          <div style={{ fontSize: 9, color: GOLD, fontFamily: "sans-serif", letterSpacing: 1, marginTop: 2 }}>
+            OPEN SOURCE
+          </div>
+        </div>
+
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 9, color: "#888", fontFamily: "sans-serif", letterSpacing: 1 }}>AUTHORISED BY</div>
+          <div style={{ fontSize: 11, color: NAVY, fontFamily: "sans-serif", fontWeight: "bold" }}>
+            Bharat Digital Mission
+          </div>
+          <div style={{ fontSize: 9, color: "#888", fontFamily: "sans-serif", marginTop: 2 }}>
+            india.gov.in
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom tricolor */}
+      <div style={{ display: "flex", height: 5, borderRadius: 3, overflow: "hidden", marginTop: 16 }}>
+        <div style={{ flex: 1, background: SAFFRON }} />
+        <div style={{ flex: 1, background: "#fff", border: "0.5px solid #ddd" }} />
+        <div style={{ flex: 1, background: INDIA_GREEN }} />
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [form, setForm] = useState({
+    name: "",
+    orgName: "",
+    category: "Made in India – Digital & Technology",
+    description: "",
+    certNo: ""
+  });
+  const [generated, setGenerated] = useState(false);
+  const [tab, setTab] = useState("form");
+
+  const categories = [
+    "Made in India – Digital & Technology",
+    "Made in India – Manufacturing",
+    "Made in India – Agriculture & Food",
+    "Made in India – Textiles & Handicrafts",
+    "Made in India – Pharmaceuticals",
+    "Made in India – Aerospace & Defence",
+    "Made in India – Open Source Software",
+    "Atmanirbhar Bharat – Innovation",
+  ];
+
+  const randomCertNo = () => {
+    const id = Math.floor(Math.random() * 999999).toString().padStart(6, "0");
+    return `BHARAT-2026-${id}`;
+  };
+
+  const handleGenerate = () => {
+    setForm(f => ({ ...f, certNo: f.certNo || randomCertNo() }));
+    setGenerated(true);
+    setTab("preview");
+  };
+
+  const handlePrint = () => window.print();
+
+  return (
+    <div style={{ minHeight: "100vh", background: LIGHT_SAFFRON, fontFamily: "sans-serif" }}>
+      {/* Top bar */}
+      <div style={{
+        background: NAVY,
+        color: "#fff",
+        padding: "10px 24px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }}>
+        <AshokaChakra size={32} color="#fff" />
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 2 }}>BHARAT CERTIFICATE GENERATOR</div>
+          <div style={{ fontSize: 10, color: "#aac4ff", letterSpacing: 1 }}>
+            Make in India Initiative · india.gov.in · Open Source
+          </div>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
+          <div style={{ width: 14, height: 28, background: SAFFRON, borderRadius: 2 }} />
+          <div style={{ width: 14, height: 28, background: "#fff", borderRadius: 2 }} />
+          <div style={{ width: 14, height: 28, background: INDIA_GREEN, borderRadius: 2 }} />
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", borderBottom: `2px solid ${GOLD}44`, background: "#fff", padding: "0 24px" }}>
+        {["form", "preview"].map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            background: "none", border: "none", padding: "12px 20px",
+            cursor: "pointer", fontWeight: 600, fontSize: 13,
+            color: tab === t ? SAFFRON : "#888",
+            borderBottom: tab === t ? `3px solid ${SAFFRON}` : "3px solid transparent",
+            marginBottom: -2, letterSpacing: 1, textTransform: "uppercase"
+          }}>
+            {t === "form" ? "📝 Fill Details" : "📜 Certificate"}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ padding: "28px 20px", maxWidth: 760, margin: "0 auto" }}>
+
+        {tab === "form" && (
+          <div style={{ background: "#fff", borderRadius: 14, padding: 28, boxShadow: "0 2px 16px #0001" }}>
+            <TricolorStripe />
+            <h2 style={{ color: NAVY, margin: "0 0 6px", fontSize: 20 }}>Certificate Details</h2>
+            <p style={{ color: "#777", marginTop: 0, marginBottom: 24, fontSize: 13 }}>
+              Fill in the details below to generate your official Hindustan Certificate under the Make in India initiative.
+            </p>
+
+            {[
+              { label: "Recipient / Company Name *", key: "name", placeholder: "e.g. RAM Technologies Pvt. Ltd." },
+              { label: "Organisation / Project Name", key: "orgName", placeholder: "e.g. Project Pushonboardpublish" },
+              { label: "Certificate Number (auto if blank)", key: "certNo", placeholder: "e.g. BHARAT-2026-000001" },
+            ].map(f => (
+              <div key={f.key} style={{ marginBottom: 18 }}>
+                <label style={{ display: "block", fontSize: 12, color: NAVY, fontWeight: 700, marginBottom: 6, letterSpacing: 1 }}>
+                  {f.label.toUpperCase()}
+                </label>
+                <input
+                  value={form[f.key]}
+                  onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                  placeholder={f.placeholder}
+                  style={{
+                    width: "100%", padding: "10px 14px", borderRadius: 8,
+                    border: `1.5px solid ${GOLD}88`, fontSize: 14,
+                    outline: "none", boxSizing: "border-box",
+                    fontFamily: "sans-serif", color: NAVY
+                  }}
+                />
+              </div>
+            ))}
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: "block", fontSize: 12, color: NAVY, fontWeight: 700, marginBottom: 6, letterSpacing: 1 }}>
+                CATEGORY
+              </label>
+              <select
+                value={form.category}
+                onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                style={{
+                  width: "100%", padding: "10px 14px", borderRadius: 8,
+                  border: `1.5px solid ${GOLD}88`, fontSize: 14,
+                  color: NAVY, background: "#fff", fontFamily: "sans-serif"
+                }}
+              >
+                {categories.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontSize: 12, color: NAVY, fontWeight: 700, marginBottom: 6, letterSpacing: 1 }}>
+                DESCRIPTION (OPTIONAL)
+              </label>
+              <textarea
+                value={form.description}
+                onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                placeholder="In recognition of contribution to India's indigenous innovation..."
+                rows={3}
+                style={{
+                  width: "100%", padding: "10px 14px", borderRadius: 8,
+                  border: `1.5px solid ${GOLD}88`, fontSize: 13,
+                  resize: "vertical", fontFamily: "sans-serif",
+                  color: NAVY, boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <button onClick={handleGenerate} disabled={!form.name} style={{
+              width: "100%", padding: "14px",
+              background: form.name ? `linear-gradient(135deg, ${SAFFRON}, ${INDIA_GREEN})` : "#ccc",
+              color: "#fff", border: "none", borderRadius: 10,
+              fontSize: 15, fontWeight: 700, cursor: form.name ? "pointer" : "not-allowed",
+              letterSpacing: 2, textTransform: "uppercase"
+            }}>
+              🇮🇳 Generate Hindustan Certificate
+            </button>
+          </div>
+        )}
+
+        {tab === "preview" && (
+          <div>
+            {generated ? (
+              <>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16, gap: 10 }}>
+                  <button onClick={() => setTab("form")} style={{
+                    padding: "8px 18px", borderRadius: 8, border: `1.5px solid ${NAVY}`,
+                    background: "#fff", color: NAVY, cursor: "pointer", fontWeight: 600, fontSize: 13
+                  }}>
+                    ✏️ Edit
+                  </button>
+                  <button onClick={handlePrint} style={{
+                    padding: "8px 18px", borderRadius: 8, border: "none",
+                    background: INDIA_GREEN, color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13
+                  }}>
+                    🖨️ Print / Save PDF
+                  </button>
+                </div>
+                <CertificatePreview data={form} />
+                <div style={{
+                  marginTop: 16, padding: "12px 18px",
+                  background: "#fff", borderRadius: 10,
+                  border: `1px solid ${GOLD}44`, fontSize: 12, color: "#666", textAlign: "center"
+                }}>
+                  🔓 Open Source · MIT License · Built under Make in India Initiative · india.gov.in
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: 60, color: "#aaa" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>📜</div>
+                <div style={{ fontSize: 15 }}>Fill in the details and click <strong>Generate</strong> to preview your certificate.</div>
+                <button onClick={() => setTab("form")} style={{
+                  marginTop: 18, padding: "10px 24px", background: SAFFRON,
+                  color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700
+                }}>Go to Form</button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <style>{`@media print { body * { visibility: hidden; } .cert-preview, .cert-preview * { visibility: visible; } }`}</style>
+    </div>
+  );
+}
